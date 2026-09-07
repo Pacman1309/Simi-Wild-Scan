@@ -1,0 +1,48 @@
+classDiagram
+  class Usuario {
+    +int idUsuario
+    +string correo
+    +string contrasenaHash
+    +Rol rol
+    +bool mayorEdad
+    +registrar()
+    +iniciarSesion()
+    +anonimizar()
+  }
+  class Registro {
+    +int idRegistro
+    +DateTime fecha
+    +double latitud
+    +double longitud
+    +TipoIncidente tipo
+    +Nivel gravedad
+    +EstadoReporte estado
+    +crear()
+    +editar()
+    +moderar()
+    +relacionar()
+  }
+  class Foto {
+    +int idFoto
+    +bytes contenido
+    +bytes sha256
+    +validarMetadatos()
+  }
+  class BitacoraAdministrativa {
+    +int idBitacora
+    +string tipoAccion
+    +string detalles
+    +DateTime fechaAccion
+    +registrar()
+  }
+  class MatchPolicy {
+    +buscarEn10MinutosY100Metros(registro)
+    +compararCaracteristicas(a, b)
+  }
+
+  Usuario "0..1" --> "0..*" Registro : crea
+  Registro "1" *-- "0..1" Foto : contiene
+  Usuario "0..1" --> "0..*" BitacoraAdministrativa : ejecuta
+  Registro "0..1" --> "0..*" BitacoraAdministrativa : afecta
+  Registro "0..1" --> "0..*" Registro : relaciona
+  MatchPolicy ..> Registro

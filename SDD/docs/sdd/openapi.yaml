@@ -1,0 +1,777 @@
+openapi: 3.1.0
+info:
+  title: DogAlert API
+  version: 1.1.0
+  description: Contrato REST del MVP DogAlert. Los esquemas públicos nunca incluyen PII ni coordenadas exactas.
+servers:
+  - url: https://api.example.invalid/v1
+    description: Sustituir por el dominio del entorno
+tags:
+  - name: Public
+  - name: Auth
+  - name: Reports
+  - name: Profile
+  - name: Admin
+
+paths:
+  /health:
+    get:
+      tags: [Public]
+      operationId: getHealth
+      responses:
+        "200":
+          description: Servicio disponible
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, const: ok }
+
+  /public/protocols:
+    get:
+      tags: [Public]
+      operationId: getPublicProtocols
+      responses:
+        "200":
+          description: Protocolo de seguridad vigente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SafetyProtocol" }
+
+  /public/reports:
+    get:
+      tags: [Public]
+      operationId: listPublicReports
+      parameters:
+        - { $ref: "#/components/parameters/From" }
+        - { $ref: "#/components/parameters/To" }
+        - { $ref: "#/components/parameters/EventType" }
+        - { $ref: "#/components/parameters/Severity" }
+        - { $ref: "#/components/parameters/Bbox" }
+        - { $ref: "#/components/parameters/Cursor" }
+      responses:
+        "200":
+          description: Solo reportes verificados con ubicación aproximada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/PublicReport" }
+                  nextCursor: { type: [string, "null"] }
+                  coverageWarning: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /public/heatmap:
+    get:
+      tags: [Public]
+      operationId: getPublicHeatmap
+      parameters:
+        - { $ref: "#/components/parameters/From" }
+        - { $ref: "#/components/parameters/To" }
+        - { $ref: "#/components/parameters/EventType" }
+        - { $ref: "#/components/parameters/Severity" }
+        - { $ref: "#/components/parameters/Bbox" }
+      responses:
+        "200":
+          description: Conteos agregados por celda pública
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [cells, coverageWarning]
+                properties:
+                  cells:
+                    type: array
+                    items: { $ref: "#/components/schemas/HeatmapCell" }
+                  coverageWarning: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "201":
+          description: Cuenta creada; devuelve JWT propio
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenResponse" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Credenciales válidas; devuelve JWT propio
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logoutUser
+      security: [{ BearerJwt: [] }]
+      responses:
+        "204": { description: Sesión cerrada }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /reports:
+    post:
+      tags: [Reports]
+      operationId: createReport
+      description: Acepta un JWT propio opcional; sin JWT crea reporte anónimo.
+      security:
+        - {}
+        - BearerJwt: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [payload]
+              properties:
+                payload: { $ref: "#/components/schemas/ReportCreate" }
+                photo:
+                  type: string
+                  format: binary
+            encoding:
+              payload:
+                contentType: application/json
+      responses:
+        "201":
+          description: Reporte creado en estado pendiente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportReceipt" }
+        "200":
+          description: Reintento idempotente; devuelve el reporte existente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportReceipt" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /me/session:
+    post:
+      tags: [Profile]
+      operationId: recordSession
+      security: [{ BearerJwt: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [adultConfirmed, privacyAccepted]
+              properties:
+                adultConfirmed: { type: boolean, const: true }
+                privacyAccepted: { type: boolean, const: true }
+      responses:
+        "200":
+          description: Perfil sincronizado y última sesión actualizada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me/profile:
+    get:
+      tags: [Profile]
+      operationId: getMyProfile
+      security: [{ BearerJwt: [] }]
+      responses:
+        "200":
+          description: Perfil propio
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me/contact-consent:
+    patch:
+      tags: [Profile]
+      operationId: updateContactConsent
+      security: [{ BearerJwt: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [consent]
+              properties:
+                consent: { type: boolean }
+                phone: { type: [string, "null"], maxLength: 32 }
+      responses:
+        "200":
+          description: Consentimiento actualizado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Profile" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+
+  /me/reports:
+    get:
+      tags: [Reports]
+      operationId: listMyReports
+      security: [{ BearerJwt: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Cursor" }
+      responses:
+        "200":
+          description: Reportes propios en cualquier estado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/OwnedReport" }
+                  nextCursor: { type: [string, "null"] }
+
+  /me/reports/{reportId}:
+    parameters:
+      - { $ref: "#/components/parameters/ReportId" }
+    get:
+      tags: [Reports]
+      operationId: getMyReport
+      security: [{ BearerJwt: [] }]
+      responses:
+        "200":
+          description: Detalle propio
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OwnedReport" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [Reports]
+      operationId: updateMyReport
+      security: [{ BearerJwt: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReportUpdate" }
+      responses:
+        "200":
+          description: Editado y devuelto a pendiente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OwnedReport" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+    delete:
+      tags: [Reports]
+      operationId: deleteMyReport
+      security: [{ BearerJwt: [] }]
+      responses:
+        "204": { description: Contenido, ubicación y foto eliminados }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/reports:
+    get:
+      tags: [Admin]
+      operationId: listAdminReports
+      security: [{ BearerJwt: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/From" }
+        - { $ref: "#/components/parameters/To" }
+        - { $ref: "#/components/parameters/EventType" }
+        - { $ref: "#/components/parameters/Severity" }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/ReportStatus" }
+        - name: externalToCreel
+          in: query
+          schema: { type: boolean }
+        - { $ref: "#/components/parameters/Cursor" }
+      responses:
+        "200":
+          description: Lista privada administrativa
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/AdminReport" }
+                  nextCursor: { type: [string, "null"] }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/reports/{reportId}:
+    get:
+      tags: [Admin]
+      operationId: getAdminReport
+      security: [{ BearerJwt: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/ReportId" }
+      responses:
+        "200":
+          description: Detalle exacto y evidencia autorizada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminReport" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /admin/reports/{reportId}/moderation:
+    post:
+      tags: [Admin]
+      operationId: moderateReport
+      security: [{ BearerJwt: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/ReportId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ModerationRequest" }
+      responses:
+        "200":
+          description: Estado actualizado y auditado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminReport" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+
+  /admin/reports/{reportId}/matches:
+    get:
+      tags: [Admin]
+      operationId: listReportMatches
+      security: [{ BearerJwt: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/ReportId" }
+      responses:
+        "200":
+          description: Posibles coincidencias, no decisiones automáticas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MatchCandidate" }
+
+  /admin/reports/{reportId}/relationships:
+    post:
+      tags: [Admin]
+      operationId: relateReports
+      security: [{ BearerJwt: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/ReportId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetReportId, relationType, reason]
+              properties:
+                targetReportId: { type: integer, minimum: 1 }
+                relationType:
+                  type: string
+                  enum: [DUPLICATE_OF, CORROBORATES]
+                reason: { type: string, minLength: 3, maxLength: 2000 }
+      responses:
+        "201": { description: Relación creada y auditada }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /admin/metrics:
+    get:
+      tags: [Admin]
+      operationId: getAdminMetrics
+      security: [{ BearerJwt: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/From" }
+        - { $ref: "#/components/parameters/To" }
+        - { $ref: "#/components/parameters/EventType" }
+        - { $ref: "#/components/parameters/Severity" }
+      responses:
+        "200":
+          description: Métricas sobre verificados; oficiales excluyen externos
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Metrics" }
+
+  /admin/exports:
+    post:
+      tags: [Admin]
+      operationId: createExport
+      security: [{ BearerJwt: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExportRequest" }
+      responses:
+        "200":
+          description: Archivo generado y registrado en la bitácora
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /admin/audit:
+    get:
+      tags: [Admin]
+      operationId: listAuditEvents
+      security: [{ BearerJwt: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/From" }
+        - { $ref: "#/components/parameters/To" }
+        - { $ref: "#/components/parameters/Cursor" }
+      responses:
+        "200":
+          description: Eventos redactados
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/AuditEvent" }
+                  nextCursor: { type: [string, "null"] }
+
+components:
+  securitySchemes:
+    BearerJwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, format: uuid }
+    ReportId:
+      name: reportId
+      in: path
+      required: true
+      schema: { type: integer, minimum: 1 }
+    From:
+      name: from
+      in: query
+      schema: { type: string, format: date-time }
+    To:
+      name: to
+      in: query
+      schema: { type: string, format: date-time }
+    EventType:
+      name: eventType
+      in: query
+      schema: { $ref: "#/components/schemas/EventType" }
+    Severity:
+      name: severity
+      in: query
+      schema: { $ref: "#/components/schemas/Severity" }
+    Bbox:
+      name: bbox
+      in: query
+      description: minLon,minLat,maxLon,maxLat
+      schema: { type: string, pattern: "^-?[0-9.]+,-?[0-9.]+,-?[0-9.]+,-?[0-9.]+$" }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+
+  schemas:
+    RegisterRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password, adultConfirmed, privacyAccepted]
+      properties:
+        name: { type: [string, "null"], maxLength: 150 }
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, format: password, minLength: 8, maxLength: 128 }
+        adultConfirmed: { type: boolean, const: true }
+        privacyAccepted: { type: boolean, const: true }
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, format: password, minLength: 1, maxLength: 128 }
+    TokenResponse:
+      type: object
+      additionalProperties: false
+      required: [accessToken, tokenType, expiresIn]
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, const: Bearer }
+        expiresIn: { type: integer, minimum: 1, description: Segundos }
+    EventType:
+      type: string
+      enum: [SIGHTING, ATTACK_PERSON, ATTACK_PET, ATTACK_LIVESTOCK, ATTACK_WILDLIFE, INJURED_OR_SICK, HEALTH_RISK, OTHER]
+    Severity:
+      type: string
+      enum: [LOW, MEDIUM, HIGH]
+    Certainty:
+      type: string
+      enum: [LOW, MEDIUM, HIGH]
+    DogSize:
+      type: string
+      enum: [SMALL, MEDIUM, LARGE, UNDETERMINED]
+    CollarPresence:
+      type: string
+      enum: [YES, NO, UNDETERMINED]
+    ReportStatus:
+      type: string
+      enum: [PENDING, VERIFIED, REJECTED, DUPLICATE, ARCHIVED]
+    Coordinate:
+      type: object
+      required: [latitude, longitude]
+      properties:
+        latitude: { type: number, minimum: -90, maximum: 90 }
+        longitude: { type: number, minimum: -180, maximum: 180 }
+        source: { type: string, enum: [GPS, MANUAL] }
+        accuracyMeters: { type: [number, "null"], minimum: 0 }
+    ReportCreate:
+      type: object
+      required: [clientReportId, eventAt, eventType, severity, certainty, dogCount, size, colorUndetermined, collar, description, location]
+      properties:
+        clientReportId: { type: string, format: uuid }
+        eventAt: { type: string, format: date-time }
+        eventType: { $ref: "#/components/schemas/EventType" }
+        eventTypeOther: { type: [string, "null"], maxLength: 120 }
+        severity: { $ref: "#/components/schemas/Severity" }
+        certainty: { $ref: "#/components/schemas/Certainty" }
+        dogCount: { type: integer, minimum: 1, maximum: 999 }
+        size: { $ref: "#/components/schemas/DogSize" }
+        color: { type: [string, "null"], maxLength: 120 }
+        colorUndetermined: { type: boolean }
+        collar: { $ref: "#/components/schemas/CollarPresence" }
+        description: { type: string, minLength: 20, maxLength: 2000 }
+        location: { $ref: "#/components/schemas/Coordinate" }
+    ReportUpdate:
+      type: object
+      required: [eventAt, eventType, severity, certainty, dogCount, size, colorUndetermined, collar, description, location]
+      properties:
+        eventAt: { type: string, format: date-time }
+        eventType: { $ref: "#/components/schemas/EventType" }
+        eventTypeOther: { type: [string, "null"], maxLength: 120 }
+        severity: { $ref: "#/components/schemas/Severity" }
+        certainty: { $ref: "#/components/schemas/Certainty" }
+        dogCount: { type: integer, minimum: 1, maximum: 999 }
+        size: { $ref: "#/components/schemas/DogSize" }
+        color: { type: [string, "null"], maxLength: 120 }
+        colorUndetermined: { type: boolean }
+        collar: { $ref: "#/components/schemas/CollarPresence" }
+        description: { type: string, minLength: 20, maxLength: 2000 }
+        location: { $ref: "#/components/schemas/Coordinate" }
+    ReportReceipt:
+      type: object
+      required: [id, clientReportId, status, replayed]
+      properties:
+        id: { type: integer, minimum: 1 }
+        clientReportId: { type: string, format: uuid }
+        status: { $ref: "#/components/schemas/ReportStatus" }
+        replayed: { type: boolean }
+    PublicReport:
+      type: object
+      required: [publicId, eventAt, eventType, severity, dogCount, approximateLocation, externalToCreel]
+      properties:
+        publicId: { type: integer, minimum: 1 }
+        eventAt: { type: string, format: date-time }
+        eventType: { $ref: "#/components/schemas/EventType" }
+        severity: { $ref: "#/components/schemas/Severity" }
+        dogCount: { type: integer }
+        size: { $ref: "#/components/schemas/DogSize" }
+        color: { type: [string, "null"] }
+        collar: { $ref: "#/components/schemas/CollarPresence" }
+        approximateLocation: { $ref: "#/components/schemas/PublicCoordinate" }
+        externalToCreel: { type: boolean }
+    PublicCoordinate:
+      type: object
+      required: [latitude, longitude]
+      additionalProperties: false
+      properties:
+        latitude: { type: number, minimum: -90, maximum: 90 }
+        longitude: { type: number, minimum: -180, maximum: 180 }
+    OwnedReport:
+      allOf:
+        - $ref: "#/components/schemas/ReportReceipt"
+        - type: object
+          required: [eventAt, eventType, severity, certainty, dogCount, size, collar, description, exactLocation]
+          properties:
+            eventAt: { type: string, format: date-time }
+            eventType: { $ref: "#/components/schemas/EventType" }
+            severity: { $ref: "#/components/schemas/Severity" }
+            certainty: { $ref: "#/components/schemas/Certainty" }
+            dogCount: { type: integer }
+            size: { $ref: "#/components/schemas/DogSize" }
+            collar: { $ref: "#/components/schemas/CollarPresence" }
+            description: { type: string }
+            exactLocation: { $ref: "#/components/schemas/Coordinate" }
+            hasPhoto: { type: boolean }
+    AdminReport:
+      allOf:
+        - $ref: "#/components/schemas/OwnedReport"
+        - type: object
+          properties:
+            reporterMode: { type: string, enum: [ANONYMOUS, REGISTERED] }
+            contactAllowed: { type: boolean }
+            contactPhone: { type: [string, "null"] }
+            externalToCreel: { type: boolean }
+            matchCount: { type: integer, minimum: 0 }
+    SafetyProtocol:
+      type: object
+      required: [version, language, title, content]
+      properties:
+        version: { type: integer }
+        language: { type: string, example: es-MX }
+        title: { type: string }
+        content: { type: string }
+    HeatmapCell:
+      type: object
+      required: [center, count]
+      properties:
+        center: { $ref: "#/components/schemas/PublicCoordinate" }
+        count: { type: integer, minimum: 1 }
+        externalToCreel: { type: boolean }
+    Profile:
+      type: object
+      required: [id, role, contactConsent, status]
+      properties:
+        id: { type: integer, minimum: 1 }
+        role: { type: string, enum: [USER, ADMIN] }
+        contactConsent: { type: boolean }
+        phone: { type: [string, "null"] }
+        status: { type: string, enum: [ACTIVE, ANONYMIZED, DISABLED] }
+    ModerationRequest:
+      type: object
+      required: [toStatus, reason, checklist]
+      properties:
+        toStatus: { $ref: "#/components/schemas/ReportStatus" }
+        reason: { type: string, minLength: 3, maxLength: 2000 }
+        checklist:
+          type: object
+          additionalProperties: { type: boolean }
+    MatchCandidate:
+      type: object
+      required: [candidateReportId, distanceMeters, deltaSeconds, signals]
+      properties:
+        candidateReportId: { type: integer, minimum: 1 }
+        distanceMeters: { type: number, minimum: 0 }
+        deltaSeconds: { type: integer, minimum: 0 }
+        signals:
+          type: array
+          items: { type: string }
+    Metrics:
+      type: object
+      required: [verifiedReports, observedDogs, byType, bySeverity, methodology]
+      properties:
+        verifiedReports: { type: integer, minimum: 0 }
+        observedDogs: { type: integer, minimum: 0 }
+        byType: { type: object, additionalProperties: { type: integer } }
+        bySeverity: { type: object, additionalProperties: { type: integer } }
+        methodology: { type: string }
+    ExportRequest:
+      type: object
+      required: [format, geographicPolicy, purpose, filters]
+      properties:
+        format: { type: string, enum: [CSV, XLSX, PDF, GEOJSON, MAP_PNG] }
+        geographicPolicy: { type: string, enum: [PUBLIC_APPROXIMATE, ADMIN_EXACT] }
+        purpose: { type: string, minLength: 3, maxLength: 500 }
+        filters: { type: object, additionalProperties: true }
+        authorizationEvidence: { type: [string, "null"], maxLength: 500 }
+    AuditEvent:
+      type: object
+      required: [id, actorKind, action, result, createdAt]
+      properties:
+        id: { type: integer, minimum: 1 }
+        actorKind: { type: string, enum: [ANONYMOUS, USER, ADMIN, SYSTEM] }
+        action: { type: string }
+        objectType: { type: [string, "null"] }
+        result: { type: string, enum: [SUCCESS, DENIED, FAILED] }
+        createdAt: { type: string, format: date-time }
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, requestId]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            requestId: { type: string, format: uuid }
+            details:
+              type: array
+              items: { type: object, additionalProperties: true }
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Identidad ausente o inválida
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Rol o finalidad no autorizados
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: Conflicto de versión, estado o idempotencia
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ValidationError:
+      description: Validación de dominio fallida
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    TooManyRequests:
+      description: Límite temporal excedido
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+

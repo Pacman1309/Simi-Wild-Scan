@@ -1,0 +1,21 @@
+flowchart TD
+  START([Inicio]) --> RESPONSIBLE{¿Hay responsable visible?}
+  RESPONSIBLE -->|Sí| OUT[Explicar que no corresponde\ny mostrar protocolos]
+  RESPONSIBLE -->|No| WARN[Mostrar aviso de seguridad]
+  WARN --> FORM[Capturar tipo, gravedad, certeza,\nfecha, cantidad y características]
+  FORM --> GPS{¿GPS autorizado y disponible?}
+  GPS -->|Sí| AUTO[Capturar punto GPS]
+  GPS -->|No| MANUAL[Seleccionar punto manual]
+  AUTO --> PHOTO{¿Agregar foto opcional?}
+  MANUAL --> PHOTO
+  PHOTO -->|Sí| COMPRESS[Comprimir y validar <= 1 MB]
+  PHOTO -->|No| REVIEW[Revisar resumen]
+  COMPRESS --> REVIEW
+  REVIEW --> VALID{¿Datos válidos?}
+  VALID -->|No| FORM
+  VALID -->|Sí| NET{¿Hay conexión estable?}
+  NET -->|Sí| SEND[Enviar con llave idempotente]
+  NET -->|No| SAVE[Guardar en cola cifrada]
+  SEND --> PENDING[Servidor crea o recupera PENDING]
+  SAVE --> END([Mostrar estado local])
+  PENDING --> END

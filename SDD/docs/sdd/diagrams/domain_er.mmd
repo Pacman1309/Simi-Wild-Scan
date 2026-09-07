@@ -1,0 +1,43 @@
+erDiagram
+  USUARIOS o|--o{ REGISTROS : crea
+  REGISTROS ||--o| FOTOS : contiene
+  USUARIOS o|--o{ BITACORA_ADMINISTRATIVA : ejecuta
+  REGISTROS o|--o{ BITACORA_ADMINISTRATIVA : afecta
+  REGISTROS o|--o{ REGISTROS : relaciona
+
+  USUARIOS {
+    int ID_Usuario PK
+    string Nombre
+    string Correo UK
+    string Contrasena_Hash
+    string Rol
+    boolean Mayor_Edad
+    boolean Contacto_Autorizado
+    datetime Ultima_Actividad
+  }
+  REGISTROS {
+    int ID_Registro PK
+    datetime Fecha
+    double Latitud
+    double Longitud
+    int ID_Usuario FK
+    string TipoIncidente
+    string Gravedad
+    string Report_Status
+    string Sync_Status
+    int ID_Registro_Relacionado FK
+  }
+  FOTOS {
+    int ID_Fotos PK
+    int ID_Registro FK
+    blob Foto
+    binary SHA256
+  }
+  BITACORA_ADMINISTRATIVA {
+    int ID_Bitacora PK
+    int ID_Usuario FK
+    int ID_Registro FK
+    string Tipo_Accion
+    string Detalles
+    datetime Fecha_Accion
+  }

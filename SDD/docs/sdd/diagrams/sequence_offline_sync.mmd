@@ -1,0 +1,26 @@
+sequenceDiagram
+  actor U as Reportante
+  participant M as App móvil
+  participant Q as SQLite cifrada
+  participant N as Monitor de red
+  participant API as API DogAlert
+  participant DB as MySQL
+
+  U->>M: Confirma reporte sin red
+  M->>Q: Guardar UUID, payload y foto
+  Q-->>M: LOCAL_SAVED
+  M-->>U: Guardado localmente
+  N-->>M: Conexión recuperada
+  M->>Q: Cambiar a SYNCING
+  M->>API: POST con mismo Idempotency-Key
+  API->>DB: Insertar o recuperar por llave única
+  DB-->>API: Reporte único PENDING
+  API-->>M: 201 o 200 replayed
+  M->>Q: Marcar SYNCED y borrar contenido sensible
+  M-->>U: Sincronizado
+
+  alt Red interrumpida
+    API--xM: Timeout
+    M->>Q: SYNC_ERROR + siguiente intento
+    M->>API: Reintento con la misma llave
+  end

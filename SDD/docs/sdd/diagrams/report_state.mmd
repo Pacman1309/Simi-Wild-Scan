@@ -1,0 +1,18 @@
+stateDiagram-v2
+  [*] --> PENDING: sincronización aceptada
+  PENDING --> VERIFIED: verificar + motivo
+  PENDING --> REJECTED: rechazar + motivo
+  PENDING --> DUPLICATE: duplicar + relación
+  PENDING --> ARCHIVED: archivar + motivo
+  VERIFIED --> PENDING: edición del autor
+  VERIFIED --> REJECTED: revisión administrativa
+  VERIFIED --> DUPLICATE: revisión administrativa
+  VERIFIED --> ARCHIVED: retiro administrativo
+  REJECTED --> PENDING: reabrir
+  DUPLICATE --> PENDING: corregir relación
+  ARCHIVED --> PENDING: reabrir
+  PENDING --> [*]: borrado del autor
+  VERIFIED --> [*]: borrado del autor
+  REJECTED --> [*]: borrado del autor
+  DUPLICATE --> [*]: borrado del autor
+  ARCHIVED --> [*]: borrado del autor

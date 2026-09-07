@@ -1,0 +1,24 @@
+sequenceDiagram
+  actor U as Reportante
+  participant M as App móvil React Native
+  participant API as API Spring Boot
+  participant DB as MySQL
+
+  U->>M: Completa y confirma reporte
+  M->>M: Validar, comprimir foto y generar UUID
+  M->>API: POST /v1/reports + Idempotency-Key
+  API->>API: Validar esquema, fecha y límites
+  API->>DB: INSERT Registros (PENDIENTE)
+  opt Foto incluida
+    API->>DB: INSERT Fotos (LONGBLOB + SHA-256)
+  end
+  API->>DB: INSERT Bitacora_Administrativa
+  DB-->>API: ID_Registro
+  API-->>M: 201 ReportReceipt
+  M-->>U: Mostrar Pendiente
+
+  opt Reintento de la misma solicitud
+    M->>API: Mismo UUID e Idempotency-Key
+    API->>DB: Buscar Clave_Idempotencia
+    API-->>M: 200 mismo ReportReceipt, replayed=true
+  end

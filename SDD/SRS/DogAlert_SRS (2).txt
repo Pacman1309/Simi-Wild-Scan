@@ -1,0 +1,1245 @@
+DOGALERT - SRS v1.0
+
+Campus Chihuahua
+Dog Alert
+Documento SRS
+
+Jazmin Borunda Estrada - A01564215
+Santiago Derat Hernández- A01569168
+Francisco Huerta Trujillo - A01567335
+Isabella Murillo Salgado - A01564010
+Eliab Sagarnaga Rivera - A01563881
+
+Profesor: David García
+Materia: Integración de seguridad informática en redes y sistema de software
+Grupo: 400
+
+25 de Agosto del 2026
+
+INTRODUCCIÓN
+1.1​ Propósito
+Este documento especifica de forma verificable los requerimientos funcionales y no funcionales de DogAlert, una aplicación
+móvil para registrar y consultar avistamientos e incidentes relacionados con perros sin una persona responsable visible. El SRS
+servirá como acuerdo de alcance entre el equipo, el socioformador y la persona responsable de aceptar el prototipo. También
+será la base para el diseño, la implementación, las pruebas y la aceptación.
+
+1.2​ Problemática
+En Creel, Chihuahua, habitantes, turistas, hoteleros, dueños de mascotas, productores y otras personas pueden encontrarse con
+perros que deambulan sin una persona responsable visible. Los acontecimientos pueden ir desde un avistamiento sin agresión
+hasta ataques a personas, mascotas, ganado o fauna silvestre, así como la observación de animales heridos o con posibles
+signos de enfermedad.
+Actualmente no existe para el socio formador un registro comunitario centralizado, georreferenciado, permanente y
+suficientemente estructurado que permita conocer con claridad:
+●​
+●​
+●​
+●​
+●​
+●​
+●​
+
+Dónde se concentran los avistamientos e incidentes.
+Con qué frecuencia ocurren.
+Qué tipos de incidentes son reportados.
+Cuántos perros se observan en cada evento.
+Cuáles reportes parecen describir el mismo evento, perro o jauría.
+Qué información ha sido revisada y considerada suficientemente confiable.
+Cómo evoluciona la actividad reportada a través del tiempo.
+
+La falta de información homogénea dificulta dimensionar el problema y presentar evidencia organizada ante el Gobierno de
+Creel u otras autoridades competentes. Los reportes informales o dispersos pueden contener duplicados, ubicaciones
+imprecisas, descripciones incompletas o sesgos derivados de la participación desigual de la comunidad.
+DogAlert busca resolver la falta de registro y visualización de evidencia. La aplicación será neutral: recopilará, moderará y
+presentará información, pero no diagnosticará animales, no determinará tratamientos y no recomendará captura, esterilización,
+reubicación o eutanasia. Las decisiones de política pública o intervención corresponderá a especialistas y autoridades.
+
+1.3​ Objetivo del producto
+Entregar un MVP funcional que permita registrar, moderar, consultar, visualizar y exportar reportes georreferenciados, incluso
+cuando el reporte se prepare temporalmente sin conexión. La principal variable de éxito del MVP será la cantidad de reportes
+verificados, acompañada por métricas de calidad y cobertura para evitar que el volumen por sí solo distorsione el resultado.
+
+1.4​ Alcance incluido
+El MVP incluirá:
+●​ Aplicación móvil React Native para Android e iOS.
+●​ Reportes anónimos y reportes de usuarios registrados.
+●​ Registro mediante correo y contraseña para personas adultas.
+●​ Captura de fecha, hora, ubicación, cantidad de perros, tamaño, color, collar y descripción.
+●​ Fotografía opcional y metadatos como señales auxiliares de verificación.
+●​ Captura manual de ubicación cuando no se autorice el GPS.
+●​ Almacenamiento local y sincronización posterior de reportes preparados sin conexión.
+●​ Moderación mediante estados de reporte.
+●​ Consulta pública de reportes verificados con ubicación aproximada.
+●​ Mapa de calor y filtros.
+●​ Panel administrativo móvil
+
+●​
+●​
+●​
+●​
+●​
+●​
+
+Detección de posibles duplicados y reportes corroborantes.
+Estadísticas oficiales de Creel y visualización.
+Exportación CSV, XLSX, PDF, imagen del mapa y GeoJSON.
+Bitácora administrativa y política de conservación de datos.
+Protocolos de seguridad para la comunidad.
+Interfaz en español; rarámuri queda como mejora condicionada a tiempo y validación lingüística.
+
+1.5​ Fuera del alcance del MVP
+•​Seguimiento de perros en tiempo real.
+•​Diagnóstico médico o veterinario.
+•​Gestión de capturas, brigadas, voluntarios, esterilizaciones o adopciones.
+•​Clasificación automática para tratamiento, reubicación o eutanasia.
+•​Notificaciones de avistamientos cercanos.
+•​Registro general de mascotas o de perros acompañados por una persona responsable.
+•​Asociación pública de personas, domicilios o propiedades con un perro.
+•​Evaluación de la efectividad de campañas de esterilización.
+•​Carga de reportes ocurridos antes del lanzamiento de DogAlert.
+•​Portal web para ciudadanos o administradores.
+
+1.6​ Área geográfica
+Creel será el área principal de análisis.​
+
+1.7​ Definiciones, siglas y abreviaturas
+•​SRS: Especificación de Requerimientos de Software.
+•​MVP: Producto Mínimo Viable.
+•​GPS: Sistema de Posicionamiento Global.
+•​API: Interfaz de Programación de Aplicaciones.
+•​DBMS: Sistema Gestor de Base de Datos.
+•​Reporte anónimo: reporte enviado sin una cuenta ni datos de contacto.
+•​Usuario registrado: persona adulta con cuenta creada mediante correo y contraseña.
+•​Administrador: usuario autorizado para moderar, consultar datos privados y exportar información.
+•​Reporte corroborante: observación independiente que coincide con otra y aumenta la confianza en la existencia de un
+evento.
+•​Reporte duplicado: repetición del mismo envío, fotografía o contenido sin aportar una observación independiente.
+•​Ubicación exacta: coordenada original, visible únicamente para administradores autorizados.
+•​Ubicación aproximada: representación pública desplazada o agregada que no revela el punto exacto.
+•​Mapa de calor: visualización agregada de la concentración de reportes verificados.
+•​GeoJSON: formato estándar para intercambiar objetos geográficos mediante JSON.
+•​PII: información que permite identificar o contactar a una persona.
+
+1.8​ Referencias
+•​Documento del socioformador: “Erradicación de Jauría de Perros Callejeros”.
+•​WildDogScan/FeralScan: https://www.feralscan.org.au/wilddogscan/default.aspx
+
+•​Ley​ Federal​
+
+de​ Protección​
+
+de​ Datos​
+
+Personales​
+
+en​ Posesión​
+
+de​ los​ Particulares:​
+
+https://
+
+www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf
+•​PCI Security Standards Council: https://www.pcisecuritystandards.org/standards/pci-dss/
+•​HHS, alcance de HIPAA: https://www.hhs.gov/hipaa/for-professionals/covered-entities/
+•​WCAG: https://www.w3.org/WAI/standards-guidelines/wcag/
+
+2.​ DESCRIPCIÓN GENERAL
+2.1​ Perspectiva del producto
+DogAlert será una solución cliente-servidor construida desde cero. El cliente móvil utilizará cámara, GPS, almacenamiento
+local y conexión de red. El backend centralizará autenticación, reportes, moderación, análisis, archivos y auditoría. Cuando no
+exista conexión, el cliente guardará el reporte localmente y lo sincronizará al recuperar una conexión estable.
+
+2.2​ Funciones generales
+•​Gestión de cuentas y sesiones.
+•​Envío anónimo de reportes.
+•​Captura estructurada de avistamientos e incidentes.
+•​Captura de ubicación automática o manual.
+•​Operación offline y sincronización idempotente.
+•​Moderación y publicación de reportes verificados.
+•​Mapas aproximados, mapas de calor y filtros.
+•​Panel administrativo y exportación.
+•​Administración de privacidad, retención y auditoría.
+•​Consulta de protocolos de seguridad.
+
+2.3​ Perfiles de usuario
+2.3.1​ Usuario anónimo
+•​Puede consultar información pública.
+•​Puede enviar un reporte sin proporcionar información personal.
+•​No puede modificar ni eliminar el reporte después de enviarlo.
+•​No puede consultar estados privados ni coordenadas exactas.
+•​Es la única modalidad permitida para menores de edad.
+2.3.2​ Usuario registrado
+•​Debe confirmar que es mayor de edad.
+•​Puede crear una cuenta con correo y contraseña.
+•​Puede consultar información pública y sus propios reportes en cualquier estado.
+•​Puede editar o eliminar sus reportes.
+•​Puede autorizar voluntariamente el contacto administrativo y registrar el teléfono.
+2.3.3​ Administrador
+•​Puede consultar todos los reportes y sus coordenadas exactas.
+•​Puede revisar evidencia y datos de contacto autorizados.
+•​Puede marcar reportes como verificados, rechazados, duplicados o archivados.
+•​Puede relacionar reportes corroborantes.
+•​Puede consultar estadísticas y realizar exportaciones.
+
+•​Puede consultar la bitácora de acciones administrativas.
+
+2.4​ Restricciones
+•​La conectividad irregular de Creel obliga a soportar captura offline.
+•​La precisión depende del GPS del dispositivo y de la información proporcionada.
+•​Las fotografías deben ser opcionales para no incentivar acercamientos peligrosos.
+•​La aplicación no puede confirmar que un perro carece realmente de dueño; solo registra que no había una persona
+responsable visible durante el evento.
+•​Las zonas con pocos reportes no pueden presentarse como zonas seguras.
+•​La fecha límite restringe el alcance al MVP definido.
+
+2.5​ Suposiciones y dependencias
+•​El dispositivo dispone de almacenamiento local suficiente.
+•​El usuario puede conceder GPS o indicar una ubicación manual.
+•​El servicio de mapas, la API y la base de datos están disponibles al sincronizar.
+•​El socio formador designará cuentas administrativas.
+•​Michelle Gutiérrez revisará la aceptación de los requerimientos y del MVP.
+•​El Gobierno de Creel se mantiene como institución receptora provisional hasta que el socio formador determine una
+dependencia específica.
+
+3.​ PLATAFORMA, ARQUITECTURA E
+INFRAESTRUCTURA SEGURA
+3.1​ Plataforma seleccionada
+•​Cliente móvil: React Native para Android e iOS.
+•​Lenguaje recomendado: TypeScript.
+•​Panel administrativo: funciones protegidas dentro de la misma aplicación móvil.​
+•​Backend: Spring Boot con Java, desplegado en contenedores Docker.
+•​API: REST sobre HTTPS con validación de esquemas.
+•​DBMS: MySQL
+•​Archivos: fotografías cifradas en la tabla Fotos de MySQL; las exportaciones se generan y entregan como flujo temporal sin almacenamiento histórico adicional.
+•​Almacenamiento local: base SQLite cifrada para la cola offline y almacenamiento seguro del sistema operativo para
+tokens.
+•​Mapas: Leaflet para el renderizado de mapas interactivos en el frontend y OpenStreetMap para los datos geográficos del
+mapa.
+•​Control de versiones y CI: GitHub y GitHub Actions.
+•​Gestión del trabajo: Jira.
+
+3.2​ Infraestructura de Nube
+El equipo utilizará Google Cloud Platform (GCP) para gestionar los servicios de infraestructura en la nube.
+Para el despliegue de la aplicación se utilizará Cloud Run, que permitirá ejecutar el código en contenedores y
+exponer el servicio a través de la red. Además, se utilizará Cloud SQL, mediante el cual se integrará una base
+de datos MySQL para almacenar y gestionar la información de la aplicación.
+
+3.3​ Aplicabilidad de estándares solicitados
+•​PCI-DSS: no aplica al alcance del MVP porque DogAlert no almacenará, procesará ni transmitirá datos de tarjetas o
+
+pagos. Se documenta la exclusión y se prohíbe agregar pagos sin una nueva evaluación de alcance.
+•​HIPAA: no aplica al alcance actual porque DogAlert no es una entidad médica cubierta ni trata información clínica
+humana por encargo de una entidad cubierta. “Posible riesgo sanitario” describirá observaciones sobre animales y no un
+diagnóstico humano.
+•​Protección de datos aplicable: DogAlert deberá considerar la Ley Federal de Protección de Datos Personales en
+Posesión de los Particulares por el tratamiento de nombre, correo, teléfono, ubicación y fotografías.
+
+4.​ REQUERIMIENTOS FUNCIONALES
+Todos los requisitos de esta sección pertenecen al MVP, salvo los marcados expresamente como futuros.
+
+4.1​ Acceso y usuarios
+•​RF-001. El sistema deberá permitir consultar mapas, reportes verificados y protocolos sin iniciar sesión.
+•​RF-002. El sistema deberá permitir enviar reportes anónimos sin solicitar nombre, correo o teléfono.
+•​RF-003. El sistema deberá permitir a una persona adulta crear una cuenta mediante correo y contraseña, previa
+aceptación del aviso de privacidad y confirmación de mayoría de edad.
+•​RF-004. El sistema deberá permitir iniciar y cerrar sesión mediante correo y contraseña.
+•​RF-005. El sistema deberá manejar los roles Usuario registrado y Administrador, además del acceso anónimo.
+•​RF-006. El sistema deberá permitir que el usuario registrado autoriza mediante una casilla que un administrador lo
+contacte. El teléfono será opcional y solo estará disponible para los administradores cuando exista consentimiento.
+
+4.2​ Registro de reportes
+•​RF-007. Antes del formulario, el sistema deberá informar que DogAlert registra perros sin una persona responsable
+visible y que el usuario no debe acercarse ni intentar capturarlos.
+•​RF-008. El sistema deberá permitir reportar los siguientes tipos de evento:
+•​Avistamiento sin incidente.
+•​Agresión o ataque a una persona.
+•​Ataque a una mascota.
+•​Ataque a ganado.
+•​Ataque a fauna silvestre.
+•​Perro herido o enfermo.
+•​Posible riesgo sanitario.
+•​Otro.
+•​RF-009. El sistema deberá registrar la gravedad de manera independiente al tipo:
+•​Baja: avistamiento sin agresión, lesiones ni daños.
+•​Media: persecución, conducta agresiva o lesión no crítica.
+•​Alta: ataque a personas, lesión grave, muerte de un animal o posible riesgo sanitario importante.
+•​RF-010. El formulario deberá requerir fecha, hora, ubicación, cantidad de perros, tamaño, color, presencia de collar y
+descripción. Tamaño, color y collar deberán admitir la respuesta “No se pudo determinar”.
+•​RF-011. El formulario deberá permitir indicar certeza baja, media o alta.
+•​RF-012. La fotografía será opcional y podrá obtenerse desde cámara o galería. La interfaz no deberá sugerir que el
+usuario se acerque al animal para fotografiarlo.
+•​RF-013. Cuando exista fotografía, el sistema podrá extraer metadatos como señal auxiliar de fecha y ubicación, sin
+tratarlos como prueba absoluta, el orden es el siguiente Metadatos->GPS->selección manual.
+•​RF-014. El sistema deberá obtener la ubicación mediante GPS con permiso del usuario. Si el permiso se rechaza o el
+GPS no está disponible, deberá permitir seleccionar manualmente un punto en el mapa.
+•​RF-015. El sistema deberá aceptar únicamente fechas a partir del lanzamiento de DogAlert y no permitir fechas futuras.
+
+4.3​ Operación offline
+
+•​RF-016. El usuario deberá poder completar y guardar el formulario sin conexión.
+•​RF-017. Cada reporte local deberá mostrar uno de los estados: Guardado localmente, Pendiente de sincronización,
+Sincronizando, Error de sincronización o Sincronizado.
+•​RF-018. El sistema deberá sincronizar automáticamente al recuperar una conexión estable.
+•​RF-019. La sincronización deberá ser idempotente: reintentar un envío no deberá crear dos reportes en el servidor.
+
+4.4​ Moderación, edición y eliminación
+•​RF-020. Un reporte sincronizado deberá iniciar con estado Pendiente.
+•​RF-021. La aplicación deberá poder asignar los estados Verificado, Rechazado, Duplicado o Archivado y registrar el
+motivo de la decisión.
+•​RF-022. Para verificar un reporte, la aplicación deberá revisar coherencia, completitud, ausencia de contenido explícito
+o impropio y señales disponibles para descartar falsedad o duplicación. La fotografía no será obligatoria.
+•​RF-023. La aplicación podrá considerar reportes independientes coincidentes como corroboración. La cantidad de
+reportes por sí sola no garantizará la veracidad.
+•​RF-024. El usuario registrado deberá poder consultar todos sus reportes y su estado.
+•​RF-025. El usuario registrado podrá editar un reporte propio. Si el reporte estaba verificado, regresará automáticamente
+a Pendiente.
+•​RF-026. El usuario registrado podrá eliminar completamente un reporte propio. El sistema conservará únicamente una
+entrada técnica mínima que indique que ocurrió una eliminación, sin conservar el contenido, ubicación ni datos
+personales del reporte eliminado.
+•​RF-027. El usuario anónimo no podrá editar ni eliminar el reporte después de enviarlo.
+
+4.5​ Duplicados y corroboración
+•​RF-028. El sistema deberá marcar como posible coincidencia dos reportes creados en un lapso de 10 minutos, dentro de
+100 metros y con características compatibles.
+•​RF-029. La detección automática no deberá bloquear un reporte independiente; deberá presentarlo al administrador
+como candidato a Duplicado o Corroborante.
+•​RF-030. Un mismo archivo fotográfico, contenido prácticamente idéntico o reintento con el mismo identificador
+idempotente podrá marcarse automáticamente como candidato a Duplicado.
+
+4.6​ Mapas y consulta pública
+•​RF-031. Solo los reportes Verificados podrán aparecer en vistas públicas.
+•​RF-032. El público deberá ver ubicaciones aproximadas y mapas de calor, nunca coordenadas exactas.
+•​RF-033. Las coordenadas exactas solo estarán disponibles para administradores autorizados.
+•​RF-034. El mapa deberá permitir filtrar por rango de fechas, tipo de evento y gravedad.
+•​RF-035. El mapa deberá advertir que una zona sin reportes no necesariamente es una zona sin perros y puede reflejar
+falta de participación.
+
+4.7​ Administración, métricas y exportación
+•​RF-036. El panel administrativo deberá mostrar listado de reportes, fecha, hora, ubicación, tipo, gravedad, cantidad y
+características de perros, evidencia, estado y señales de duplicación.
+•​RF-037. El panel deberá filtrar por rango de fechas, tipo, gravedad, estado y pertenencia o no a Creel.
+•​RF-038. El sistema deberá calcular sobre reportes verificados: cantidad de avistamientos, cantidad observada de perros,
+eventos por tipo, gravedad y zonas de concentración.
+•​RF-039. Cualquier estimación de perros únicos deberá etiquetarse como aproximada y no deberá obtenerse sumando
+directamente todos los perros observados.
+•​RF-040. El sistema deberá permitir exportar los datos autorizados como CSV, XLSX, PDF y GeoJSON, además de
+generar una imagen del mapa actual.
+
+•​RF-041. Las exportaciones públicas o entregables al gobierno deberán excluir datos personales y usar ubicaciones
+aproximadas salvo autorización formal y justificada.
+•​RF-042. El sistema deberá mantener una bitácora de creación, modificación, moderación, exportación y eliminación,
+con actor, fecha, acción y objeto afectado.
+
+4.8​ Conservación y protocolos
+•​RF-043. Los reportes no eliminados por su autor deberán conservarse durante al menos cinco años.
+•​RF-044. Los datos personales de una cuenta deberán eliminarse o anonimizarse después de 12 meses sin un inicio de
+sesión exitoso. Un nuevo inicio de sesión reiniciará el periodo.
+•​RF-045. La aplicación deberá mostrar protocolos de seguridad de solo lectura, incluyendo no acercarse, perseguir,
+alimentar ni intentar capturar al animal y buscar ayuda de una autoridad ante peligro inmediato.
+•​RF-046. Las notificaciones de avistamientos cercanos deberán permanecer deshabilitadas en el MVP.
+
+5.​ REQUERIMIENTOS NO FUNCIONALES
+5.1​ Plataforma y compatibilidad
+•​RNF-PLAT-01. DogAlert deberá desarrollarse con React Native y TypeScript para Android e iOS.
+•​RNF-PLAT-02. Las funciones de administrador deberán ejecutarse dentro de la aplicación móvil y estar protegidas por
+rol.
+•​RNF-PLAT-03. La interfaz del MVP deberá estar completamente disponible en español. La versión en rarámuri será
+futura y requerirá validación de hablantes competentes.
+
+5.2​ Rendimiento y capacidad
+•​RNF-REN-01. El backend deberá mantener un tiempo de actividad objetivo de 99.5 % mensual, excluyendo
+mantenimiento programado comunicado.
+•​RNF-REN-02. Al recuperar conexión 3G o superior, un reporte sin fotografía deberá sincronizarse en un máximo de 3
+segundos en condiciones de prueba controladas.
+•​RNF-REN-03. El percentil 95 de las respuestas de la API deberá permanecer por debajo de 5 segundos con 100
+solicitudes concurrentes de prueba.
+•​RNF-REN-04. Una consulta de mapa de calor para cinco años deberá responder en menos de 2 segundos para el
+volumen estimado del MVP.
+•​RNF-REN-05. Las fotografías deberán comprimirse a un máximo de 1 MB antes de persistirse en la cola offline o
+enviarse al servidor.
+
+5.3​ Seguridad
+•​RNF-SEG-01. Toda comunicación cliente-servidor deberá usar HTTPS/TLS vigente y configuraciones criptográficas
+seguras.
+•​RNF-SEG-02. El backend deberá aplicar control de acceso por roles y privilegio mínimo.
+•​RNF-SEG-03. La sesión de administrador deberá expirar después de 15 minutos de inactividad.
+•​RNF-SEG-04. La base de datos, respaldos, fotografías y coordenadas exactas deberán cifrarse en reposo.
+•​RNF-SEG-05. La cola offline deberá cifrarse y no deberá ser accesible desde registros de depuración o copias de
+seguridad inseguras del dispositivo.
+•​RNF-SEG-06. La API deberá validar entradas, limitar intentos abusivos y tamaño de archivos, y rechazar formatos no
+permitidos.
+•​RNF-SEG-07. Ningún secreto, llave o contraseña deberá almacenarse en el repositorio GitHub.
+
+5.4​ Privacidad
+
+•​RNF-PRI-01. La recopilación de datos deberá apegarse a los principios de licitud, finalidad, lealtad, consentimiento,
+calidad, proporcionalidad, información y responsabilidad.
+•​RNF-PRI-02. La aplicación deberá presentar un aviso de privacidad antes de crear una cuenta o proporcionar datos de
+contacto.
+•​RNF-PRI-03. Los datos de contacto deberán ser opcionales para reportar y no deberán mostrarse al público.
+•​RNF-PRI-04. La ubicación exacta se considerará confidencial y toda vista pública deberá usar aproximación o
+agregación.
+•​RNF-PRI-05. La eliminación programada de información personal deberá ejecutarse al menos una vez al día y
+producir evidencia de auditoría sin conservar el dato eliminado.
+
+5.5​ Usabilidad y accesibilidad
+•​RNF-USA-01. Al menos 85 % de cinco participantes representativos deberá completar un reporte de prueba sin ayuda
+externa.
+•​RNF-USA-02. El tiempo mediano para completar un reporte sin fotografía deberá ser menor o igual a 90 segundos.
+•​RNF-USA-03. La interfaz deberá cumplir WCAG nivel AA en contraste, tamaño táctil, etiquetas, mensajes y
+navegación accesible aplicables a una aplicación móvil.
+•​RNF-USA-04. Los mensajes deberán explicar claramente falta de conexión, GPS desactivado, permisos rechazados,
+sincronización, posibles coincidencias y errores.
+
+5.6​ Confiabilidad, respaldo y recuperación
+•​RNF-CON-01. La sincronización no deberá perder ni duplicar reportes ante cierre de la aplicación, interrupción de red
+o reintentos.
+•​RNF-CON-02. La base de datos deberá tener respaldos cifrados diarios con retención mínima de 30 días.
+•​RNF-CON-03. El objetivo de punto de recuperación será de 24 horas y el objetivo de tiempo de recuperación será de 8
+horas para el MVP.
+•​RNF-CON-04. Se deberá realizar al menos una prueba de restauración antes de la aceptación final.
+
+5.7​ Mantenibilidad y calidad
+•​RNF-MAN-01. Todo cambio deberá pasar por pull request y al menos una revisión de otro integrante.
+•​RNF-MAN-02. La integración continua deberá ejecutar análisis estático, pruebas y compilación.
+•​RNF-MAN-03. Los requisitos, historias, pruebas y tickets deberán conservar trazabilidad mediante identificadores.
+•​RNF-MAN-04. La cobertura automatizada de los módulos críticos deberá alcanzar al menos 70 %.
+
+6.​ CASOS DE USO
+Actores:
+●​
+●​
+●​
+●​
+●​
+●​
+
+Usuario anónimo.
+Usuario registrado.
+Administrador.
+Servicio de autenticación propio del backend Spring Boot.
+Servicio de mapas.
+Sistema de almacenamiento y exportación.
+
+Casos principales:
+CU-01 Consultar mapa público.
+CU-02 Consultar mapa de calor y aplicar filtros.
+
+CU-03 Consultar protocolos de seguridad.
+CU-04 Enviar reporte anónimo.
+CU-05 Crear cuenta.
+CU-06 Iniciar/cerrar sesión.
+CU-07 Crear reporte registrado.
+CU-08 Guardar reporte offline.
+CU-09 Sincronizar reporte.
+CU-10 Consultar reportes propios.
+CU-11 Editar reporte propio.
+CU-12 Eliminar reporte propio.
+CU-13 Moderar reporte.
+CU-14 Revisar posibles duplicados y corroboraciones.
+CU-15 Consultar coordenada exacta con autorización.
+CU-16 Consultar estadísticas administrativas.
+CU-17 Exportar información.
+CU-18 Consultar bitácora.
+
+Relaciones mínimas del diagrama:
+●​
+●​
+●​
+●​
+●​
+●​
+
+CU-04 y CU-07 incluyen capturar ubicación y validar formulario.
+CU-07 puede extenderse con adjuntar fotografía.
+CU-08 incluye CU-09 cuando vuelve la conexión.
+CU-13 incluye revisar evidencia, registrar motivo y cambiar estado.
+CU-14 extiende CU-13.
+CU-17 incluye anonimizar información y aplicar permisos.
+
+7.​ HISTORIAS DE USUARIO Y CRITERIOS DE ACEPTACIÓN
+HU-01. Reporte anónimo
+Como integrante de la comunidad, quiero enviar un reporte sin crear una cuenta para contribuir sin proporcionar información
+personal.
+Criterios:
+-​ No se solicita nombre, correo ni teléfono.
+-​ El reporte puede enviarse online o guardarse offline.
+-​ Después de sincronizarse aparece como Pendiente.
+-​ El usuario anónimo no puede modificarlo ni eliminarlo.
+
+HU-02. Crear cuenta e iniciar sesión
+Como persona adulta, quiero crear una cuenta mediante correo y contraseña para consultar y administrar mis propios reportes.
+
+Criterios:
+-​ Se confirma la mayoría de edad y se acepta el aviso de privacidad.
+-​ El correo debe tener formato válido y no estar registrado.
+-​ La contraseña en texto plano nunca se almacena; la tabla Usuarios conserva únicamente un hash seguro de longitud suficiente.
+-​ Una autenticación válida permite acceder al perfil.
+
+HU-03. Registrar un evento georreferenciado
+Como usuario, quiero registrar un evento con ubicación y características para aportar evidencia estructurada.
+Criterios:
+-​ Se requiere fecha, hora, ubicación, cantidad, tamaño, color, collar y descripción.
+-​ La fotografía es opcional.
+-​ Se puede elegir tipo, gravedad y certeza.
+-​ El sistema impide fechas anteriores al lanzamiento y fechas futuras.
+
+HU-04. Registrar sin conexión
+Como usuario en una zona sin cobertura, quiero guardar el reporte localmente para sincronizarlo cuando vuelva Internet.
+Criterios:
+-​ Cerrar y abrir la aplicación no elimina el reporte local.
+-​ La recuperación de conexión inicia la sincronización.
+-​ Los reintentos no crean duplicados.
+
+HU-05. Consultar y corregir reportes propios
+Como usuario registrado, quiero consultar, editar o eliminar mis reportes para corregir errores y controlar mi información.
+Criterios:
+-​ Se muestran todos los estados de mis reportes.
+-​ Editar un reporte verificado lo regresa a Pendiente.
+-​ Eliminarlo borra contenido, fotografía, ubicación y asociación personal.
+-​ Un usuario no puede administrar reportes de otro.
+
+HU-06. Consultar información pública
+Como integrante de la comunidad, quiero consultar reportes verificados para conocer zonas con actividad reportada sin
+exponer información privada.
+Criterios:
+-​ Solo se muestran reportes verificados.
+-​ Las ubicaciones son aproximadas.
+-​ No se muestran nombres, correos, teléfonos ni coordenadas exactas.
+-​ Se advierte que ausencia de reportes no significa ausencia de riesgo.
+
+HU-07. Consultar mapa de calor y filtros
+Como usuario, quiero filtrar y visualizar un mapa de calor para analizar patrones de actividad. Su agrupación se calcula por la
+cantidad de reportes dentro de un área 150 m y si son mayores a una cantidad especificada por el socio formador aparecerá la
+zona como roja, naranja, amarilla, verde y gris en caso de que no haya reportes en el área
+Criterios:
+-​ Se filtra por fecha, tipo y gravedad.
+-​ El mapa usa únicamente reportes verificados.
+
+HU-08. Moderar reportes
+Como administrador, quiero revisar reportes para publicar únicamente información suficientemente coherente y segura.
+
+Criterios:
+-​ Se revisa coherencia, campos, contenido y señales de autenticidad.
+-​ La ausencia de fotografía no impide verificar.
+-​ Todo cambio de estado exige motivo y queda en la bitácora.
+-​ Solo un reporte Verificado aparece públicamente.
+
+HU-09. Analizar posibles coincidencias
+Como administrador, quiero revisar reportes cercanos en tiempo, espacio y características para distinguir duplicados de
+observaciones corroborantes.
+Criterios:
+-​ El sistema señala coincidencias de 100 metros y 10 minutos.
+-​ También compara tamaño, color y collar.
+-​ No bloquea automáticamente una observación independiente.
+-​ El administrador decide Duplicado o Corroborante.
+
+HU-10. Dar consentimiento de contacto
+Como usuario registrado, quiero decidir si un administrador puede contactarme para conservar el control sobre mis datos.
+Criterios:
+-​ La casilla está desmarcada inicialmente.
+-​ El teléfono es opcional.
+-​ Sin consentimiento, el administrador no ve ni utiliza el teléfono para seguimiento.
+
+HU-11. Consultar panel administrativo
+Como administrador, quiero consultar reportes y métricas para preparar evidencia para el socio formador.
+Criterios:
+-​ El listado contiene los campos definidos en RF-037.
+-​ Se puede filtrar sin acceder a datos ajenos al rol.
+-​ Las métricas oficiales usan reportes verificados de Creel.
+
+HU-12. Exportar información
+Como administrador, quiero exportar datos para analizarlos y presentarlos al gobierno.
+Criterios:
+-​ Se permite CSV, XLSX, PDF, GeoJSON e imagen del mapa.
+-​ La exportación respeta filtros.
+-​ Se eliminan datos personales y se aproximan ubicaciones salvo autorización formal.
+-​ La acción queda registrada en la bitácora.
+
+HU-13. Aplicar conservación de datos
+Como responsable de datos, quiero anonimizar cuentas inactivas y conservar reportes para cumplir la política aprobada.
+Criterios:
+-​ Un inicio de sesión reinicia el periodo de 12 meses.
+-​ La cuenta inactiva pierde sus datos personales al vencer el periodo.
+
+-​
+-​
+
+Los reportes no eliminados permanecen al menos cinco años de forma anónima.
+Se registra el resultado técnico del proceso.
+
+HU-14. Consultar protocolos
+Como usuario, quiero consultar instrucciones de seguridad para actuar sin ponerme en peligro.
+Criterios:
+-​ La información está disponible sin iniciar sesión.
+-​ Se indica no acercarse, perseguir, alimentar ni capturar al animal.
+-​ Se indica buscar ayuda ante peligro inmediato.
+-​ No se exige una fotografía.
+
+8.​ ESTRATEGIA DE PRUEBAS Y ACEPTACIÓN
+8.1​ Trazabilidad
+Cada prueba deberá referenciar al menos un RF, RNF o criterio de aceptación. Jira conservará la relación entre requisito,
+historia, ticket, pull request y resultado de prueba.
+
+8.2​ Niveles de prueba
+•​Revisión estática del SRS, arquitectura y código.
+•​Pruebas unitarias de validación, gravedad, privacidad, filtros y duplicados.
+•​Pruebas de integración entre aplicación, API, autenticación, DBMS, mapas y archivos.
+•​Pruebas end-to-end de los flujos principales.Pruebas de seguridad de roles, sesiones, datos privados, entradas y archivos.
+•​Pruebas de rendimiento con 100 solicitudes concurrentes.
+•​Pruebas de usabilidad con al menos cinco participantes representativos.
+•​Pruebas offline: cierre, reapertura, reintento, recuperación de red y ausencia de doble envío.
+•​Prueba de respaldo y restauración.
+•​Pruebas de aceptación con Michelle Gutiérrez.
+
+8.3​ Criterios de aceptación del MVP
+El MVP se considerará aceptado cuando:
+●​ Todos los RF de prioridad MVP tengan pruebas aprobadas.
+●​ No existan defectos críticos o altos abiertos.
+●​ Los RNF de seguridad, privacidad y operación offline hayan sido verificados.
+●​ La compilación funcione en al menos un dispositivo Android y uno iOS compatibles.
+●​ El socio formador ejecute los flujos de aceptación y documente su resultado.
+●​ El repositorio, manual, diagramas, base de datos, SRS y evidencias sean entregados.
+
+9.​ ESTÁNDAR DE ADMINISTRACIÓN DEL PROYECTO
+9.1​ Scrum
+•​Sprint: dos semanas, salvo Sprint 0 y cierre.
+•​Product Backlog: historias priorizadas en Jira.
+•​Sprint Backlog: historias comprometidas para el sprint.
+•​Daily Scrum: seguimiento breve de avances, impedimentos y próximo trabajo.
+
+•​Sprint Review: demostración del incremento.
+•​Retrospective: acuerdos de mejora del proceso.
+•​Refinement: aclaración y estimación de historias antes del siguiente sprint.
+
+9.2​ Responsabilidades
+•​Isabella: Scrum Master, coordinación, seguimiento, interfaces externas y arquitectura de software.
+•​Eliab: especificación, requisitos, riesgos, frontend y moderación.
+•​Jazmín: requisitos no funcionales, seguridad, datos, restricciones y calidad.
+•​Santiago: propósito, alcance, usuarios, hardware, integración y pruebas.
+•​Paco: interfaces de usuario, experiencia móvil, backend y mapas.
+•​Todo el equipo: historias, desarrollo, revisión, pruebas y documentación.
+
+9.3​ Flujo de GitHub y Jira
+•​Todo trabajo inicia en un ticket de Jira con criterio de aceptación.
+•​Las ramas se nombran feature/ID-descripcion, fix/ID-descripcion o docs/ID-descripcion.
+•​Nadie integra directamente a main.
+•​Cada pull request requiere pruebas exitosas y una revisión de otro integrante.
+•​GitHub Actions ejecuta compilación, pruebas, lint y análisis de dependencias.
+•​Jira registra responsable, estimación, estado y evidencia de cierre.
+
+9.4​ Definición de terminado
+Una historia está terminada cuando el código está integrado, las pruebas pasan, los criterios de aceptación están demostrados, la
+documentación está actualizada y no quedan defectos críticos.
+
+10.​ VARIABLES DE DESEMPEÑO
+10.1​ Tecnológicas
+Variable
+
+Meta
+
+Fuente/Frecuencia
+
+Disponibilidad backend
+
+>= 99.5 % mensual
+
+Cloud Monitoring/mensual
+
+Respuesta API p95
+
+<= 5 s con 100 concurrentes
+
+Prueba de carga/sprint
+
+Sincronización texto
+
+<= 3 s en 3G de prueba
+
+Prueba de integración/sprint
+
+Mapa de calor
+
+<= 2 s
+
+Prueba de rendimiento/sprint
+
+Errores de sincronización
+
+< 1 % de intentos
+
+Telemetría/semanal
+
+Duplicados por reintento
+
+0
+
+Prueba offline/build
+
+Defectos críticos abiertos
+
+0 en entrega
+
+Jira/diario
+
+Cobertura módulos críticos
+
+>= 70 %
+
+CI/cada pull request
+
+Reportes verificados
+
+Tendencia creciente
+
+Panel/semanal
+
+11.​ ENTREGABLES
+Entregable
+
+Responsable principal
+
+Criterio de aceptación
+
+SRS corregido y aprobado
+
+Isabella/Eliab
+
+Rúbrica cubierta y evidencia del
+socio
+
+Backlog e historias en Jira
+
+Isabella
+
+Priorizado, estimado y trazable
+
+Prototipos e interfaces
+
+Paco
+
+Flujos principales representados
+
+Santiago/equipo
+
+Consistentes con RF y arquitectura
+
+Diseño de base de datos/MySQL
+
+Jazmín/Eliab
+
+Modelo, restricciones e índices
+
+Arquitectura e infraestructura segura
+
+Isabella/Jazmín
+
+Código fuente móvil y backend
+
+Todo el equipo
+
+Repositorio, CI y revisión
+
+Plan, casos y resultados de prueba
+
+Santiago
+
+Trazabilidad y evidencias
+
+Matriz de riesgos actualizada
+
+Eliab/Isabella
+
+Cronograma y seguimiento
+
+Isabella
+
+Jira y Gantt actualizados
+
+Manual de usuario y licencia
+
+Paco/Santiago
+
+Revisados y entregados
+
+MVP funcional
+
+Todo el equipo
+
+Diagramas de casos, actividades, clases y secuencia
+
+12.​ ESTIMACIÓN DEL ESFUERZO
+12.1​ Técnica y herramienta
+
+Componentes y controles documentados
+
+Responsables y respuestas vigentes
+
+Aceptado a más tardar el 23/10/2026
+
+El equipo utilizará Planning Poker con la secuencia Fibonacci (1, 2, 3, 5, 8, 13) y registrará las estimaciones en Jira. La
+estimación considera complejidad, incertidumbre, pruebas e integración. Jira generará burndown y velocidad; la estimación se
+revisará al final de cada sprint.
+
+12.2​ Estimación inicial
+Épica
+
+Puntos
+
+Responsable principal
+
+Sprint previsto
+
+Planeación, SRS y arquitectura
+
+5
+
+Isabella/Eliab
+
+Sprint 0
+
+Navegación, cuentas y roles
+
+8
+
+Paco/Isabella
+
+Sprint 1
+
+Registro online y validaciones
+
+13
+
+Eliab/Paco
+
+Sprint 1
+
+Cola offline y sincronización
+
+13
+
+Santiago/Eliab
+
+Sprint 2
+
+Mapas, privacidad geográfica y heatmap
+
+13
+
+Paco/Jazmín
+
+Sprint 2
+
+Moderación, estados y coincidencias
+
+13
+
+Eliab/Isabella
+
+Sprint 3
+
+Panel, métricas y exportaciones
+
+13
+
+Jazmín/Paco
+
+Sprint 3
+
+Seguridad, privacidad, retención y auditoría
+
+8
+
+Jazmín/Isabella
+
+Sprint 3
+
+Pruebas, manual, estabilización y entrega
+
+13
+
+Santiago/equipo
+
+Cierre
+
+TOTAL
+
+99
+
+Equipo
+
+4 sprints + cierre
+
+Con una velocidad objetivo de 22 a 28 puntos por sprint, cuatro sprints permiten una capacidad de 88 a 112 puntos. La
+estimación de 99 puntos queda dentro del intervalo, pero cualquier desviación deberá provocar ajuste de alcance futuro, nunca
+eliminación de controles críticos de seguridad, privacidad u operación offline.
+
+13.​ CRONOGRAMA Y GANTT
+Semanas: W1: 25-28 ago | W2: 31 ago-4 sep | W3: 7-11 sep | W4: 14-18 sep W5: 21-25 sep | W6: 28 sep-2 oct | W7: 5-9 oct |
+
+W8: 12-16 oct W9: 19-23 oct
+
+Actividad
+
+Responsable
+
+W1
+
+W2
+
+W3
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+Corrección y aprobación del
+SRS
+
+Todos/socio
+
+Arquitectura, DB y diseño
+
+Todo el equipo
+
+Prototipos y diseño móvil
+
+Isa/Santiago
+
+Diagramas requeridos
+
+Jaz/Isa
+
+Sprint 1: cuentas y reportes
+online
+
+Paco/Eliab
+
+Sprint 2: offline, mapas y
+privacidad
+
+Santiago/Paco/
+Jazmín
+
+Sprint 3: moderación, panel
+y exportación
+
+Eliab/Isabella/
+Jazmín
+
+Pruebas continuas y seguridad
+
+Todo el equipo
+
+Documentación y manual
+
+Paco/Santiago
+
+Aceptación con socio y
+correcciones
+
+socio/equipo
+
+██
+
+Entrega del MVP
+
+Todo el equipo
+
+23/10
+
+██
+
+██
+
+W4
+
+W5
+
+W6
+
+W7
+
+W8
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+██
+
+W9
+
+██
+
+██
+
+██
+
+██
+
+Hitos: - 04/09/2026: SRS, arquitectura y backlog base aprobados internamente. - 18/09/2026: flujo de cuenta y reporte online
+demostrable. - 02/10/2026: captura offline, sincronización y mapas demostrables. - 16/10/2026: moderación, panel y
+exportaciones integrados. - 21/10/2026: pruebas de aceptación con socio formador. - 23/10/2026: entrega del MVP funcional.
+
+14.​ ANÁLISIS DE RIESGOS
+Escala: Probabilidad (P) e Impacto (I) de 1 a 3. Nivel = P x I. 1-2 Bajo; 3-4 Medio; 6-9 Alto.
+
+Riesgo
+
+P
+
+I
+
+Prevención/Mitigación
+
+Contingencia
+
+Baja participación y
+pocos reportes
+
+3
+
+3
+
+Difusión con hoteles y
+socio; UX breve
+
+Piloto dirigido y
+nueva campaña
+
+Reportes falsos o
+duplicados
+
+3
+
+Reportar perros
+acompañados o
+domésticos
+
+3
+
+Exposición de
+ubicación o datos
+personales
+
+3
+
+Moderación, rate limit,
+metadatos, coincidencias
+
+Rechazar/duplicar y
+ajustar reglas
+
+3
+
+Pregunta de
+responsable visible e
+instrucciones
+
+Rechazar y
+capacitar
+moderadores
+
+2
+
+3
+
+Aproximación pública,
+RBAC, cifrado, revisión
+
+Revocar acceso,
+investigar y notificar
+
+Pérdida o doble envío al
+sincronizar
+
+2
+
+3
+
+Cola cifrada, UUID
+idempotente, pruebas
+offline
+
+Reintento controlado y
+reconciliación
+
+Usuario se acerca para
+obtener fotografía
+
+2
+
+3
+
+Foto opcional y aviso
+visible
+
+Retirar contenido
+que lo incentive
+
+Falta de GPS o
+ubicación imprecisa
+
+3
+
+2
+
+Selección manual, nivel de
+certeza
+
+Marcar aproximado y
+revisar
+
+Compromiso de una cuenta
+2
+administrativa
+
+3
+
+autenticación JWT propia, RBAC, sesión
+corta, auditoría
+
+Bloquear cuenta y
+rotar credenciales
+
+3
+
+3
+
+Avisos y métricas de
+cobertura
+
+Corregir informes y
+comunicación
+
+2
+
+2
+
+Monitoreo, respaldos y
+operación offline
+
+Restaurar y usar
+cola local
+
+Retraso por crecimiento
+de alcance
+
+2
+
+3
+
+Backlog priorizado y
+control de cambios
+
+Mover funciones no
+críticas a futuro
+
+Menor disponibilidad de
+un integrante
+
+2
+
+2
+
+Revisión cruzada y
+documentación
+
+Reasignar tickets y
+ajustar sprint
+
+Costos o límites del
+proveedor de nube/
+mapas
+
+2
+
+2
+
+Alertas de presupuesto y
+pruebas de consumo
+
+Reducir uso o
+migrar proveedor
+
+2
+
+Tratarlos solo como señal
+auxiliar
+
+Verificar con
+coherencia/
+corroboración
+
+Interpretar ausencia de
+reportes como seguridad
+
+Caída de API, mapas o DB
+
+Metadatos fotográficos
+manipulados/ausentes
+
+2
+
+15.​ PARTICIPACIÓN DEL EQUIPO
+
+Miembro
+Isabella Murillo Salgado
+
+Eliab Sagarnaga
+Jazmín Gabriela Borunda Estrada
+
+Santiago Derat Hernández
+Francisco Javier Huerta Trujillo
+
+Contribuciones documentadas
+Scrum Master; historias; riesgos; RF; spec-driven; interfaces externas y de software.
+
+Spec-driven; historias; riesgos; requisitos funcionales; apoyo de backend y moderación.
+
+Historias; riesgos; RF/RNF; funciones; restricciones; seguridad y datos.
+Historias; riesgos; RF; propósito; alcance; usuarios; hardware; pruebas y diagramas.
+
+Historias; riesgos; RF; spec-driven; interfaces de usuario, frontend y mapas.
+
+16.​ ANEXOS
+•​Diagrama de casos de uso basado en la sección 6.
+•​Diagrama de actividades para crear y moderar reportes.
+•​Diagrama de secuencia para envío online y sincronización offline.
+•​Diagrama de clases o modelo de dominio.
+•​Diseño lógico y físico de MySQL.
+•​Diagrama de arquitectura y red de nube.
+•​Evidencias de Planning Poker, Jira, burndown y GitHub.
+•​Resultados de pruebas y aceptación del socio formador.
+•​Manual de usuario.
+•​Licencia de software.
+
+

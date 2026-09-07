@@ -1,0 +1,22 @@
+flowchart TD
+  START([Reporte PENDING]) --> LOAD[Consultar detalle y señales]
+  LOAD --> CONTENT{¿Contenido explícito o impropio?}
+  CONTENT -->|Sí| REJECT[Rechazar con motivo]
+  CONTENT -->|No| COMPLETE{¿Coherente y completo?}
+  COMPLETE -->|No| REJECT
+  COMPLETE -->|Sí| MATCH[Revisar candidatos]
+  MATCH --> DUP{¿Reenvío duplicado?}
+  DUP -->|Sí| DUPSTATE[Marcar DUPLICATE\ny relacionar canónico]
+  DUP -->|No| CORR{¿Observación independiente coincidente?}
+  CORR -->|Sí| LINK[Relacionar CORROBORATES]
+  CORR -->|No| VERIFY{¿Evidencia suficiente?}
+  LINK --> VERIFY
+  VERIFY -->|Sí| VERIFIED[Marcar VERIFIED]
+  VERIFY -->|No| ARCHIVE[REJECTED o ARCHIVED\ncon motivo]
+  REJECT --> AUDIT[Registrar decisión y auditoría]
+  DUPSTATE --> AUDIT
+  VERIFIED --> AUDIT
+  ARCHIVE --> AUDIT
+  AUDIT --> PUBLIC{¿VERIFIED?}
+  PUBLIC -->|Sí| SHOW[Disponible públicamente\ncon ubicación aproximada]
+  PUBLIC -->|No| HIDE[No publicar]

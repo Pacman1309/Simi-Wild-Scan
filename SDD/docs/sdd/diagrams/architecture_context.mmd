@@ -1,0 +1,20 @@
+flowchart LR
+  ANON[Usuario anónimo]
+  USER[Usuario registrado]
+  ADMIN[Administrador]
+  PARTNER[Socio formador]
+  APP[DogAlert móvil\nReact Native]
+  LOCAL[(SQLite local)]
+  API[DogAlert API\nJava + Spring Boot\nCloud Run]
+  DB[(Cloud SQL\nMySQL)]
+  MAP[Leaflet + OpenStreetMap]
+
+  ANON --> APP
+  USER --> APP
+  ADMIN --> APP
+  APP --> LOCAL
+  APP -->|HTTPS| API
+  APP -->|Consulta y muestra mapa| MAP
+  API -->|Autenticación y JWT propios| DB
+  API --> DB
+  API -->|Exportación anonimizada| PARTNER

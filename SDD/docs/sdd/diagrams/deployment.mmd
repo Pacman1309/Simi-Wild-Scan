@@ -1,0 +1,18 @@
+flowchart LR
+  subgraph PHONE[Teléfono del usuario]
+    APP[DogAlert App\nReact Native]
+    SQLITE[(Local DB\nSQLite)]
+    APP --> SQLITE
+  end
+
+  subgraph GCP[Hosted by GCP]
+    API[DogAlert API\nJava + Spring Boot\nCloud Run]
+    MYSQL[(DogAlert DB\nCloud SQL + MySQL)]
+    API --> MYSQL
+  end
+
+  LEAFLET[Leaflet\nJavaScript Library]
+  OSM[OpenStreetMap\nMap Data]
+  APP -->|HTTPS to Cloud Run| API
+  APP -->|Obtains and shows the map| LEAFLET
+  LEAFLET -->|Map data| OSM

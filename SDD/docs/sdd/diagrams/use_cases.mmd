@@ -1,0 +1,35 @@
+flowchart LR
+  A[Usuario anónimo]
+  U[Usuario registrado]
+  D[Administrador]
+
+  subgraph DogAlert
+    UC1((Consultar mapa público))
+    UC2((Filtrar mapa de calor))
+    UC3((Consultar protocolos))
+    UC4((Enviar reporte anónimo))
+    UC5((Crear cuenta e iniciar sesión))
+    UC6((Crear reporte registrado))
+    UC7((Guardar y sincronizar offline))
+    UC8((Gestionar reportes propios))
+    UC9((Moderar reporte))
+    UC10((Revisar duplicados y corroboraciones))
+    UC11((Consultar exactos y métricas))
+    UC12((Exportar y auditar))
+  end
+
+  A --> UC1
+  A --> UC2
+  A --> UC3
+  A --> UC4
+  U --> UC1
+  U --> UC2
+  U --> UC3
+  U --> UC5
+  U --> UC6
+  U --> UC7
+  U --> UC8
+  D --> UC9
+  D --> UC10
+  D --> UC11
+  D --> UC12
